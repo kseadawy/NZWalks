@@ -1,6 +1,8 @@
 ﻿using NZWalks.API.Models.Domain;
 using System;
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
+using NuGet.Protocol;
 using NZWalks.API.Data;
 
 namespace NZWalks.API.Repositories
@@ -34,19 +36,26 @@ namespace NZWalks.API.Repositories
             return removedEntity;
         }
 
-        public async Task<IEnumerable<T>> GetAllAsync()
+        public async Task<IEnumerable<T>> GetAllAsync(params Expression<Func<T, object>>[] includes)
         {
-            return  _dbSet.AsEnumerable();
-        }
-
-        public async Task<T?> GetByIdAsync(U id)
-        {
-            var returnedEntity = await _dbSet.FindAsync(id);
-            if (returnedEntity == null)
+            IQueryable<T> query = _dbSet;
+            foreach (var include in includes)
             {
-                return null;
+                query = query.Include(include);
             }
             
+            return  query.AsEnumerable();
+        }
+
+        public async Task<T?> GetByIdAsync(U id, params Expression<Func<T, object>>[] includes)
+        {
+            IQueryable<T> query = _dbSet;
+            foreach (var include in includes)
+            {
+                query = query.Include(include);
+            }
+
+            var returnedEntity = await _dbSet.FindAsync(id);
             return returnedEntity;
         }
     }

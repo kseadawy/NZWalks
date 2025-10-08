@@ -82,5 +82,6 @@ namespace NZWalks.API.Data
                 }
              );
         }
+        public DbSet<NZWalks.API.Models.Domain.WalkDto> WalkDto { get; set; } = default!;
     }
 }
