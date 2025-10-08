@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AutoMapper;
-using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using NZWalks.API.Data;
+using NZWalks.API.CustomActionFilters;
 using NZWalks.API.Models.Domain;
 using NZWalks.API.Models.DTO;
 using NZWalks.API.Repositories;
@@ -55,30 +49,31 @@ namespace NZWalks.API.Controllers
         // PUT: api/Regions/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [ValidateModel]
         public async Task<IActionResult> EditRegion(Guid id, UpdateRegionRequestDto updateRegionDto)
         {
-            var regionDomain = await _regionRepository.GetByIdAsync(id);
-            if (regionDomain == null)
-                return BadRequest();
+                var regionDomain = await _regionRepository.GetByIdAsync(id);
+                if (regionDomain == null)
+                    return BadRequest();
 
-            regionDomain.Code = updateRegionDto.Code;
-            regionDomain.Name = updateRegionDto.Name;
-            regionDomain.RegionImageUrl = updateRegionDto.RegionImageUrl;
+                regionDomain.Code = updateRegionDto.Code;
+                regionDomain.Name = updateRegionDto.Name;
+                regionDomain.RegionImageUrl = updateRegionDto.RegionImageUrl;
 
-            await _regionRepository.UpdateAsync(regionDomain);
-            var regionDto = _mapper.Map<RegionDto>(regionDomain);
-            return Ok(regionDto);
+                await _regionRepository.UpdateAsync(regionDomain);
+                var regionDto = _mapper.Map<RegionDto>(regionDomain);
+                return Ok(regionDto);
         }
 
         // POST: api/Regions
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [ValidateModel]
         public async Task<ActionResult> CreateRegion(AddRegionRequestDto regionRequestDto)
         {
-            
             var regionDomain = _mapper.Map<Region>(regionRequestDto);
             await _regionRepository.AddAsync(regionDomain);
-            
+
             var regionDto = _mapper.Map<RegionDto>(regionDomain);
             return CreatedAtAction("GetById", new { id = regionDomain.Id }, regionDto);
         }

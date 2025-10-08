@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AutoMapper;
-using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using NZWalks.API.Data;
 using NZWalks.API.Models.Domain;
 using NZWalks.API.Models.DTO;
 using NZWalks.API.Repositories;
@@ -57,15 +50,19 @@ namespace NZWalks.API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> EditWalk(Guid id, UpdateWalkRequestDto updateWalkDto)
         {
-            var walkDomain = await _walkRepository.GetByIdAsync(id);
-            if (walkDomain == null)
-                return BadRequest();
+            if (ModelState.IsValid)
+            {
+                var walkDomain = await _walkRepository.GetByIdAsync(id);
+                if (walkDomain == null)
+                    return BadRequest();
 
-            walkDomain = _mapper.Map(updateWalkDto, walkDomain);
+                walkDomain = _mapper.Map(updateWalkDto, walkDomain);
 
-            await _walkRepository.UpdateAsync(walkDomain);
-            var walkDto = _mapper.Map<WalkDto>(walkDomain);
-            return Ok(walkDto);
+                await _walkRepository.UpdateAsync(walkDomain);
+                var walkDto = _mapper.Map<WalkDto>(walkDomain);
+                return Ok(walkDto);
+            }
+            return BadRequest(ModelState);
         }
 
         // POST: api/Walks
@@ -73,10 +70,9 @@ namespace NZWalks.API.Controllers
         [HttpPost]
         public async Task<ActionResult> CreateWalk(AddWalkRequestDto WalkRequestDto)
         {
-            
             var walkDomain = _mapper.Map<Walk>(WalkRequestDto);
             await _walkRepository.AddAsync(walkDomain);
-            
+
             var walkDto = _mapper.Map<WalkDto>(walkDomain);
             return CreatedAtAction("GetById", new { id = walkDomain.Id }, walkDto);
         }
