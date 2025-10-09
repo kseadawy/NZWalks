@@ -36,15 +36,53 @@ namespace NZWalks.API.Repositories
             return removedEntity;
         }
 
-        public async Task<IEnumerable<T>> GetAllAsync(params Expression<Func<T, object>>[] includes)
+        public async Task<IEnumerable<T>> GetAllAsync(
+            Expression<Func<T, bool>>? filterExpression=null, 
+            string? sortBy=null, bool ascending = true,
+            int pageNumber = 1, int pageSize = 100,
+            params Expression<Func<T, object>>[] includes)
         {
             IQueryable<T> query = _dbSet;
+            // Apply eager loading for related entities
             foreach (var include in includes)
             {
                 query = query.Include(include);
             }
-            
-            return  query.AsEnumerable();
+            //Filtering
+            if (filterExpression != null)
+            {
+                query = query.Where(filterExpression);
+            }
+
+            // Generic sorting by property name using reflection and Expression
+            if (!string.IsNullOrWhiteSpace(sortBy))
+            {
+                var parameter = Expression.Parameter(typeof(T), "x");
+                var property = Expression.PropertyOrField(parameter, sortBy);
+                var lambda = Expression.Lambda(property, parameter);
+
+                var methodName = ascending? "OrderBy" : "OrderByDescending";
+                var resultExp = Expression.Call(
+                    typeof(Queryable),
+                    methodName,
+                    new Type[] { typeof(T), property.Type },
+                    query.Expression,
+                    Expression.Quote(lambda));
+
+                query = query.Provider.CreateQuery<T>(resultExp);
+            }
+            // Pagination
+            if (pageNumber <= 0)
+            {
+                pageNumber = 1;
+            }
+            if (pageSize <= 0)
+            {
+                pageSize = 100;
+            }
+            var skip = (pageNumber - 1) * pageSize;
+            query = query.Skip(skip).Take(pageSize);
+            return query.AsEnumerable();
         }
 
         public async Task<T?> GetByIdAsync(U id, params Expression<Func<T, object>>[] includes)

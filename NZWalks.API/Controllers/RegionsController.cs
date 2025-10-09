@@ -1,4 +1,11 @@
 ﻿using AutoMapper;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NZWalks.API.CustomActionFilters;
 using NZWalks.API.Models.Domain;
@@ -10,6 +17,7 @@ namespace NZWalks.API.Controllers
     //https://localhost:portnumber/api/regions
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class RegionsController : ControllerBase
     {
         private readonly IRegionRepository _regionRepository;
