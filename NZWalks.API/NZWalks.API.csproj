@@ -31,7 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Models\Domain\" />
+    <Folder Include="Migrations\NZWalksAuthDb\" />
   </ItemGroup>
 
 </Project>
