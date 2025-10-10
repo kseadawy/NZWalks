@@ -17,7 +17,7 @@ namespace NZWalks.API.Controllers
     //https://localhost:portnumber/api/regions
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+
     public class RegionsController : ControllerBase
     {
         private readonly IRegionRepository _regionRepository;
